@@ -58,6 +58,13 @@ jobs:
           pnpm --filter gg-app stage:node
           pnpm --filter gg-app bundle:sidecar
 
+      # installer/out/ is gitignored; the NSIS/DMG art is generated from the
+      # committed PNGs. Without this the bundler fails resolving headerImage.
+      - name: Generate installer art
+        working-directory: gg-app
+        shell: bash
+        run: pnpm installer:art
+
       - name: Build installer
         working-directory: gg-app
         shell: bash
