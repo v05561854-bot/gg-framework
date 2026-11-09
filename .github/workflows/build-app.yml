@@ -1,0 +1,71 @@
+name: Build desktop app (manual)
+
+# Manual-only: produces a downloadable Windows installer without the release
+# pipeline's signing secrets. Release builds live in release.yml (tag push,
+# protected `desktop-production` environment); this workflow exists so a
+# Windows installer can be built and downloaded from Actions on demand.
+#
+# Bundles NSIS only (per-user install, no admin) and disables updater artifact
+# signing via tauri.build-ci.conf.json — TAURI_SIGNING_PRIVATE_KEY isn't needed.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows installer
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22.x
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: gg-app/src-tauri
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # shell: bash on Windows — a PowerShell multi-line step only reports the
+      # LAST line's exit code, so a failing framework build would pass silently.
+      - name: Build framework packages
+        shell: bash
+        run: |
+          pnpm --filter @kenkaiiii/gg-ai build
+          pnpm --filter @kenkaiiii/gg-agent build
+          pnpm --filter @kenkaiiii/gg-core build
+          pnpm --filter @kenkaiiii/ggcoder build
+
+      - name: Stage node runtime + bundle sidecar
+        shell: bash
+        run: |
+          pnpm --filter gg-app stage:node
+          pnpm --filter gg-app bundle:sidecar
+
+      - name: Build installer
+        working-directory: gg-app
+        shell: bash
+        run: pnpm exec tauri build --config src-tauri/tauri.build-ci.conf.json --bundles nsis
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: gg-coder-windows-nsis
+          path: gg-app/src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error

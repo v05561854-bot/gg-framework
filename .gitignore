@@ -1,0 +1,85 @@
+node_modules/
+dist/
+out/
+release/
+coverage/
+.eslintcache
+*.tgz
+
+# Auth & secrets
+.env
+.env.*
+.npmrc
+
+# Local agent config and maintainer-only notes
+.gg/
+/.claude/
+.claude/*.lock
+CLAUDE.md
+
+# After Effects source projects never belong in the repo.
+*.[aA][eE][pP]
+*.[aA][eE][pP][xX]
+
+# Scratch / ad-hoc test files
+test_*.mjs
+test_*.js
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Rust / Swift build outputs
+target/
+.build/
+
+# Goal audit generated evidence
+.goal-artifacts/
+.goal-evidence/
+artifacts/
+packages/ggcoder/.goal-evidence/
+packages/ggcoder/ideal-sim/
+
+# Private benchmarks and experiments: never in the repo. CI's size and
+# startup gates live in .github/ci/.
+/bench/
+/benchmarks/
+/experiments/
+/scripts/
+packages/*/.bench-*.mjs
+
+# Temporary A/B sidecar builder; private harness and outputs live under /bench/.
+/gg-app/scripts/.review-control-bundle.mjs
+
+# Local research/strategy notes
+# Dated agent audit / study reports are maintainer notes, not public docs.
+/docs/*-audit-*.md
+/*-vs-*.md
+/*-report.md
+/fixes.md
+/*coding-agent*.md
+
+# Challenge feature: design sandbox and dev-only preview harness.
+#
+# Neither ships. `mockups/` is the standalone HTML/CSS/JS sandbox the fight's
+# visual language was designed in; `dev/` is a browser harness that mounts the
+# real ActivityBar so the offer can be eyeballed without the Tauri runtime.
+# Vite builds a single entry (index.html), so a production build never sees
+# them — a clean build emits dist/index.html and nothing else. Ignored so
+# `git add -A` cannot sweep 216KB of scratch into a release.
+/gg-app/mockups/
+/gg-app/dev/
+
+# agent-race: local race harness (Claude Code vs GG Coder), see agent-race/README.md
+/agent-race/
